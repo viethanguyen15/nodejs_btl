@@ -1,0 +1,623 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>thuchanhchuyensau</title>
+	<meta charset="utf-8">
+	<link rel="stylesheet" type="text/css" href="style.css">
+	<script src="https://code.jquery.com/jquery-3.4.1.min.js"></script>
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+  	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
+  	<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.0/jquery.min.js"></script>
+  	<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"></script>
+  	<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
+  	<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Lobster">
+  	<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.8.2/css/all.css" integrity="sha384-oS3vJWv+0UjzBfQzYUhtDYW+Pj2yciDJxpsK1OYPAYjqT085Qq/1cq5FLXAZQ7Ay" crossorigin="anonymous">
+	<script src="/socket.io/socket.io.js"></script>
+	<script src="https://canvasjs.com/assets/script/canvasjs.min.js"></script>
+	<style type="text/css">
+		.w3-lobster {
+  			font-family: "Lobster", serif;
+		}
+		#on{
+			width: 65px;
+			height: 50px;
+			background-color: #228B22;
+			border-radius: 10px;
+			font-size: 20px;
+			color: #FFFFFF;
+			border: 1px solid #228B22;
+			margin-left: 125px;
+		}
+		#on:hover{
+			background-color: red;
+			color: #FFFFFF;
+			/*transition: 1.4s*/
+		}
+		#on:focus{
+			background-color: #4169E1;
+			color: #FFFFFF;
+		}
+		#off{
+			width: 65px;
+			height: 50px;
+			background-color: #0000FF;
+			border-radius: 10px;
+			font-size: 20px;
+			color: #FFFFFF;
+			border: 1px solid #FFA500;
+			margin-left: 10px;
+			position: absolute;
+			margin-top: 0px;
+		}
+		#off:hover{
+			background-color: #FFA500;
+			color: #FFFFFF;
+			/*transition: 1.4s;*/
+		}
+		#off:focus{
+			background-color: #008080;
+			color: #FFFFFF;
+		}
+		.slidecontainer {
+  			width: 100%;
+		}
+
+		.slider {
+			  -webkit-appearance: none;
+			  height: 15px;
+			  border-radius: 5px;
+			  background: #d3d3d3;
+			  outline: none;
+			  opacity: 0.7;
+			  -webkit-transition: .2s;
+			  transition: opacity .2s;
+			  border: 1px solid #2F4F4F;
+		}
+
+		.slider:hover {
+		 	opacity: 1;
+		}
+
+		.slider::-webkit-slider-thumb {
+		  -webkit-appearance: none;
+		  appearance: none;
+		  width: 25px;
+		  height: 25px;
+		  border-radius: 50%;
+		  background: #4169E1;
+		  cursor: pointer;
+		}
+
+		.slider::-moz-range-thumb {
+		  width: 25px;
+		  height: 25px;
+		  border-radius: 50%;
+		  background: #800000;
+		  cursor: pointer;
+		}
+		.carousel-inner img {
+    		width: 350px;
+    		height: 220px;
+      	}
+
+	</style>
+</head>
+	<script>
+		setInterval(function(){
+			$.getJSON('/data', function(data){
+				$('#hatemp').text(data.result.Temp);
+				$('#hahum').text(data.result.Hum);
+				$('#halight').text(data.result.Gas);
+				//$('#hamaxtemp').text(data.maxtemp.Temperature);
+				//$('#hamaxhum').text(data.maxhum.Humidity);
+				//$('#hamintemp').text(data.mintemp.Temperature);
+				//$('#haminhum').text(data.minhum.Humidity);
+				var temp = document.getElementById('nd');
+				var hum = document.getElementById('da');
+				var light = document.getElementById('as');
+				/*if (data.result.Temp <= 30) {
+					temp.style.background = "red";
+				}
+				if (data.result.Temp > 30 && data.result.Temp <=40) {
+					temp.style.background = "blue";
+				}
+				if (data.result.Temp > 40 && data.result.Temp < 50) {
+					temp.style.background = "yellow";
+				}
+				
+				if (data.result.Hum <= 70) {
+					hum.style.background = "#483D8B";
+				}
+				if (data.result.Hum > 70 && data.result.Hum <= 85) {
+					hum.style.background = "#20B2AA";
+				}
+				if (data.result.Hum > 85) {
+					hum.style.background = "#808000";
+				}*/
+
+			});
+		},200);
+
+		var socket = io("http://localhost:8000");
+		//chatrealTime
+		socket.on("server-send-thatbai", function(){
+			alert("username da ton tai");
+		});
+		socket.on("server-send-danhsach", function(data){
+			$("#boxContent").html("");
+			data.forEach(function(i){
+				$("#boxContent").append("<div class = 'user'>" + i + "</div>");
+			});
+		});
+		socket.on("server-send-thanhcong", function(data){
+			$("#currentUser").html(data);
+			$("#loginForm").hide(2000);
+			$("#chatForm").show(1000);
+		});
+		socket.on("server-send-message", function(data){
+			$("#listMessages").append("<div class = 'msg'>" + data.user + ":" + data.msg + "</div>");
+		});
+		socket.on("user-typing", function(data){
+			$("#thongbao").html("<img src='source.gif' width='60' height='50'>" + data);
+		});
+		socket.on("user-stop", function(data){
+			$("#thongbao").html("");
+		});
+		$(document).ready(function(){
+
+		//control-led	
+		$("#on").click(function(){
+			socket.emit("control-led", "1");
+		});
+		$("#off").click(function(){
+			socket.emit("control-led", "0");
+		});
+		$("#myRange").change(function(){
+            var a = $("#demo").text();
+            socket.emit("control-led", a);
+        });
+
+
+		//chatRealtime
+        $("#loginForm").show();
+        $("#chatForm").hide();
+        $("#txtMessage").focusin(function(){
+        	socket.emit("user-dang-go-chu");
+        });
+        $("#txtMessage").focusout(function(){
+        	socket.emit("user-ngung-go-chu");
+        });
+        $("#btnRegister").click(function(){
+        	socket.emit("client-send-Username", $("#txtUsername").val());
+        });
+        $("#btnLogout").click(function(){
+        	socket.emit("logout");
+        	$("#chatForm").hide(2);
+        	$("#loginForm").show(1);
+        })
+        $("#btnSendMessage").click(function(){
+        	socket.emit("user-send-message", $("#txtMessage").val());
+        });
+
+        //slideToggle
+        $("#flip").click(function(){
+    		$("#panel").slideToggle("slow");
+  		});
+
+	});
+	</script>
+<body>
+	<!--<div class="background">
+		<div class="head">
+			banner
+			<div class="w3-container w3-lobster" id="block1">
+  				<p class="w3-xxxlarge" style="font-size: 38px; color: #FFFFFF; margin-left: 40px;">Sensors</p>
+  				<p class="w3-xxxlarge" style="font-size: 25px; color: #FFFFFF; margin-left: 40px;">NguyenVietHa/Mangcambien</p>
+  				<div class="block2" style="margin-left: 400px; margin-top: -100px;">
+  					<i class="fas fa-phone-volume" style="font-size: 55px; color: #FFFFFF;"></i><span style="font-size: 22px; color: #FFFFFF;">Contact: <a href="#" style="text-decoration: none; color: #FFFFFF; font-size: 22px;">0399123456</a></span>
+  				</div>
+  				<div class="block3"></div>
+  				<div class="block4" style="margin-left: 655px; margin-top: -79px;">
+  					<i class="fas fa-envelope-open-text" style="font-size: 55px; color: #FFFFFF;"></i><span style="font-size: 22px; color: #FFFFFF;"> Email: <a href="#" style="text-decoration: none; color: #FFFFFF; font-size: 22px;">viethaptit@gmail.com</a></span>	
+  				</div>
+  				<div class="icon1" style="margin-left: 1000px; margin-top: -50px;">
+  					<a href="https://www.facebook.com/haviet0610"><img src="http://chittagongit.com/download/289242" width="65" height="65"></a>
+  				</div>
+  				<div class="icon2" style="margin-left: 1100px; margin-top: -68px;">
+  					<a href="https://mail.google.com/mail/u/0/#inbox"><img src="https://techcrunch.com/wp-content/uploads/2012/08/gmail-logo-icon.png?w=300" width="65" height="65"></a>
+  				</div>
+  				<div style="margin-left: 1200px; margin-top: -60px;">
+  					<button type="button" class="btn btn-outline-success" style="font-size: 20px;">Sign up</button>
+  				</div>	
+			</div>-->
+	<nav class="navbar navbar-expand-lg navbar-dark bg-dark sticky-top" style="height: 80px;">
+		<div class="container">
+		<a class="navbar-brand" href="#" style="font-size: 35px; font-weight: bold;">Sensors</a>
+  		<button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+    		<span class="navbar-toggler-icon"></span>
+  		</button>
+
+  		<div class="collapse navbar-collapse" id="navbarSupportedContent">
+    		<ul class="navbar-nav mr-auto w-100 justify-content-end">
+      			<li class="nav-item active">
+        			<a class="nav-link" href="#showData" style="font-size: 21px;">Data <span class="sr-only">(current)</span></a>
+      			</li>
+      			<li class="nav-item">
+        			<a class="nav-link" href="#chatOnline" style="font-size: 21px;">Together</a>
+      			</li>
+      			<li class="nav-item">
+        			<a class="nav-link" href="#control_led" style="font-size: 21px;">Control</a>
+      			</li>
+      			<li class="nav-item">
+        			<a class="nav-link" href="#about" style="font-size: 21px;">ABout</a>
+      			</li>
+      			<li class="nav-item">
+        			<a class="nav-link" href="#contact" style="font-size: 21px;">Contact</a>
+      			</li>
+    		</ul>
+  		</div>
+  		</div>
+	</nav>
+			<!--iconhome-->
+			<div style="background-color: #413C6B; width: 60px; height: 60px; border: 2px solid #FFFFFF; border-radius: 10px; margin-top: 30px;">
+				<i class="fas fa-home" style="font-size: 35px; color: #FFFFFF; padding: 8px;"></i>
+			</div>
+			<!--overview-->
+			<div style="background-color: #413C6B; width: 145px; height: 54px; font-size: 28px; margin-left: 60px; margin-top: -56px; color: #FFFFFF; border-radius: 10px; padding: 8px; border: 2px solid #FFFFFF;">Overview</div>
+		</div>
+
+		<div class="main" style="width: 100%; height: 1000px; background-color: #FFFFFF;">
+			<h1 style="color: green; text-align: center; font-weight: bold;" id="showData">Show data</h1>
+			<!--Temperature-->
+			<div class="k1" style="background-color: #2F4F4F;" id="nd">
+				<p style="text-align: center; color: #FFFFFF; font-size: 24px;">Temperature</p>
+				<div style="margin-top: -17px;">
+					<img src="https://images.vexels.com/media/users/3/144180/isolated/preview/8e164ee90e658eaf8ec7c4248d301375-fahrenheit-temperature-icon-by-vexel23.png" width="100" height="100">
+				</div>
+				<div style="margin-left: 100px; margin-top: -75px;">
+					<span style="color: #FFFFFF; font-size: 19px;">Temp now: </span><span id="hatemp" style="color: #FFFFFF; font-size: 19px;"></span><span style="color: #FFFFFF; font-size: 19px;">(*C)</span>
+				</div>
+				<!--<div style="margin-left: 100px;">
+					<span style="color: #FFFFFF; font-size: 19px;">Temp max: </span><span id="hamaxtemp" style="color: #FFFFFF; font-size: 19px;"></span><span style="color: #FFFFFF; font-size: 19px;">(*C)</span>
+				</div>
+				<div style="margin-left: 100px;">
+					<span style="color: #FFFFFF; font-size: 19px;">Temp min: </span><span id="hamintemp" style="color: #FFFFFF; font-size: 19px;"></span><span style="color: #FFFFFF; font-size: 19px;">(*C)</span>
+				</div>-->
+			</div>
+
+			<!--Humidity-->
+			<div class="k1" style="background-color: #2e8b57;" id="da">
+				<p style="text-align: center; font-size: 24px; color: #FFFFFF;">Humidity</p>
+				<div style="margin-top: -18px;">
+					<img src="https://cdn.iconscout.com/icon/premium/png-256-thumb/humidity-1405137-1187424.png" width="100" height="100">
+				</div>
+				<div style="margin-left: 105px; margin-top: -75px;">
+					<span style="color: #FFFFFF; font-size: 19px;">Hum now: </span><span id="hahum" style="color: #FFFFFF; font-size: 19px;"></span><span style="color: #FFFFFF; font-size: 19px;">(%)</span>
+				</div>
+				<!--<div style="margin-left: 105px;">
+					<span style="color: #FFFFFF; font-size: 19px;">Max hum: </span><span id="hamaxhum" style="color: #FFFFFF; font-size: 19px;"></span><span style="color: #FFFFFF; font-size: 19px;">(%)</span>
+				</div>
+				<div style="margin-left: 105px;">
+					<span style="color: #FFFFFF; font-size: 19px;">Min hum: </span><span id="haminhum" style="color: #FFFFFF; font-size: 19px;"></span><span style="color: #FFFFFF; font-size: 19px;">(%)</span>
+				</div>-->
+			</div>
+
+			<!--Light-->
+			<div class="k1" style="background-color: #008080;" id="as">
+				<p style="text-align: center; font-size: 24px; color: #FFFFFF;">Gas</p>
+				<div style="margin-top: -20px; margin-left: 7px;">
+					<img src="http://luyentap.poki.vn/NewImages/images/L%E1%BB%9Bp%205/33%20kh%C3%AD%20ga.png" width="100" height="100">
+				</div>
+				<div style="margin-left: 125px; margin-top: -80px;">
+					<span style="color: #FFFFFF; font-size: 19px;">Gas now: </span><span id="halight" style="color: #FFFFFF; font-size: 19px;"></span><span style="color: #FFFFFF; font-size: 19px;"></span>
+				</div>
+			</div>
+
+		<!--control led-->
+		<div class="control" id="control_led">
+			<div style="color: green; font-size: 24px; font-weight: bold; margin-left: 110px; margin-top: 7px;">Led effect</div>
+			<div style="margin-top: -40px; margin-left: 60px;">
+				<img src="https://cdn2.iconfinder.com/data/icons/industry-3/512/led-512.png" width="45" height="45">
+			</div>
+			<div style="margin-top: 20px;">
+				<img src="https://cdn3.iconfinder.com/data/icons/shadcon/512/bulb-512.png" width="120" height="120">
+			</div>
+			<div style="font-size: 24px; color: #2F4F4F; font-weight: bold; margin-top: -110px; margin-left: 152px;">Control</div>
+			<div class="button1" style="margin-top: 10px;">
+				<input type="submit" name="b1" id="on" value="ON">
+				<input type="submit" name="b2" id="off" value="OFF">
+			</div>
+
+			<!--control slider-->
+			<div class="slidecontainer" style="width: 200px; margin-top: 40px; margin-left: 50px;">
+	  			<input type="range" min="0" max="255" value="0" class="slider" id="myRange">
+	  			<p style="text-align: center;">Value: <span id="demo" style="color: red;"></span></p>
+			</div>
+
+			<script>
+				var slider = document.getElementById("myRange");
+				var output = document.getElementById("demo");
+				output.innerHTML = slider.value;
+
+				slider.oninput = function() {
+	  				output.innerHTML = this.value;
+				}
+			</script>
+		</div>
+
+		<!--chart real time-->
+		<div style="background-color: #FFFFFF; width: 750px; height: 430px; margin-top: -300px; margin-left: 80px; border-radius: 20px; border: 2px solid #2F4F4F;">
+			<h2 style="color: green; text-align: center; font-weight: bold;">Chart real time</h2>
+			<div id="chartContainer" style="height: 300px; width: 550px; margin-left: 95px; border: 1px solid red;">
+			</div>
+			<div class="t1" style="margin-left: 108px; margin-top: 19px;">
+				<div style="background-color: red; width: 100px; height: 16px; border-radius: 10px; margin-left: 8px;">
+				</div>
+				<div style="color: red; font-size: 20px; margin-left: -12px; margin-top: 3px;">Temperature(*C)</div>
+			</div>
+			<div class="h1" style="margin-left: 315px; margin-top: -48px;">
+				<div style="background-color: #6495ED; width: 100px; height: 16px; border-radius: 10px; margin-left: 13px;">
+				</div>
+				<div style="color: #6495ED; font-size: 20px; margin-left: 10px; margin-top: 4px;">Humidity(%)</div>
+			</div>
+			<div class="l1" style="margin-left: 518px; margin-top: -52px;">
+				<div style="background-color: green; width: 100px; height: 16px; border-radius: 10px; margin-left: 13px; margin-top: 3px;">
+				</div>
+				<div style="color: green; font-size: 20px; margin-left: 24px;">Gas</div>
+			</div>		
+		</div>
+
+		<!--chart js-->
+		<script>
+			window.onload = function () {
+	        var temp = [];
+	        var hum = [];
+	  		var gas = [];
+	        var chart = new CanvasJS.Chart("chartContainer", {
+	        backgroundColor: "#ECF0F5",
+	        border: "2px solid red",
+	        theme: "hlg",
+	        title :{
+	            text: "Daily data sensor at my room"
+	        },
+	        axisY: {
+	        	title: "Temperature, Humidity, Gas",
+	            includeZero: false
+	        },
+	          toolTip: {
+	            shared: true
+	        },
+	        data: [
+	        
+	        {
+	            type: "splineArea",
+	            dataPoints: gas,
+	            xValueType: "dateTime",
+	            xValueFormatString: "hh:mm:ss TT",
+	            name: "Gas",
+	            color: "green"
+	        },
+	        {
+	            type: "splineArea",
+	            dataPoints: hum,
+	            xValueType: "dateTime",
+	            xValueFormatString: "hh:mm:ss TT",
+	            name: "Hum",
+	            color: "#2757e6"
+	        },
+	        
+	       	{
+	            type: "splineArea",
+	            dataPoints: temp,
+	            xValueType: "dateTime",
+	            xValueFormatString: "hh:mm:ss TT",
+	            name: "Temp",
+	            color: "#DC143C"
+	        }
+	        ]
+	        });
+	        var updateInterval = 1000;
+	  		var dataLength = 10;
+	  		var time = new Date;
+	  		setInterval(function(){ 
+	        $.getJSON('/data', function(hdata) {
+	            time.setTime(time.getTime()+ 1000);
+	            temp.push({
+	                x: time.getTime(),
+	                y: hdata.result.Temp
+	            });
+	            hum.push({
+	                x: time.getTime(),
+	                y: hdata.result.Hum
+	            });
+	            gas.push({
+	                x: time.getTime(),
+	                y: hdata.result.Gas
+	            });
+	            	chart.render();
+	            	if (temp.length > dataLength) {
+	        			temp.shift();
+	        		}
+	        		if (hum.length > dataLength) {
+	        			hum.shift();
+	        		}
+	        		if (gas.length > dataLength) {
+	        			gas.shift();
+	        		}
+	            });
+	        	// if (temp.length > dataLength) {
+	        	// 	temp.shift();
+	        	// }
+	        	// if (hum.length > dataLength) {
+	        	// 	hum.shift();
+	        	// }
+	        	// if (light.length > dataLength) {
+	        	// 	light.shift();
+	        	// }
+	        },500);
+	        };
+		</script>
+
+		<!--chat online-->
+		<div class="chatOnline" id="chatOnline">
+			<h2 style="text-align: center; font-weight: bold;">Chat</h2>
+			<div id="loginForm">
+				
+					  <div class="form-group">
+					  	<h4 style="text-align: center; color: green;">Login</h4>
+					  	<br>
+					    <label for="" style="margin-left: 30px;">Username:</label>
+					    <input type="text" class="form-control" id="txtUsername"placeholder="Enter your name" style="width: 75%; margin-left: 30px; border-radius: 8px; border: 1px solid #2F4F4F;">
+					  </div>
+					  <input type="submit" name="" id="btnRegister" value="Login">
+				
+			</div>
+			<div id="chatForm">
+				<div id="left">
+					<div id="boxTitle">
+						User Online
+					</div>
+					<div id="boxContent">
+
+					</div>
+				</div>
+				<div id="right">
+					<div id="userStart">
+						<span id="currentUser" style="font-size: 19px;"></span>
+						<input type="submit" name="" id="btnLogout" value="logout">
+					</div>
+					<div id="listMessages"></div>
+
+					<div id="sendMsg">
+						<div id="thongbao"></div>
+						<input type="text" name="" id="txtMessage" placeholder="enter your message">
+						<input type="submit" id="btnSendMessage" name="" value="Send" >
+					</div>
+				</div>
+			</div>
+		</div>
+
+		<!--slide toggle-->
+		<div style="width: 300px; height: 300px; position: absolute; margin-left: 880px; margin-top: -530px;">
+			<div id="flip">You can read more</div>
+			<div id="panel">
+				<span>click button on - led on</span><br>
+				<span>click button off - led off</span><br>
+				<span>control status in the control bar</span>
+			</div>
+		</div>
+
+		<!--carousel image-->
+		<div id="demo" class="carousel slide" data-ride="carousel" style="background-color: red; width: 350px; height: 220px; position: absolute; margin-left: 650px; margin-top: -395px; float: none;">
+		  <ul class="carousel-indicators">
+		    <li data-target="#demo" data-slide-to="0" class="active"></li>
+		    <li data-target="#demo" data-slide-to="1"></li>
+		    <li data-target="#demo" data-slide-to="2"></li>
+		  </ul>
+		  <div class="carousel-inner">
+		    <div class="carousel-item active">
+		      <img src="iot1.jpg" alt="iot" width="400" height="150">  
+		    </div>
+		    <div class="carousel-item">
+		      <img src="iot2.jpg" alt="iotse" width="600" height="350"> 
+		    </div>
+		    <div class="carousel-item">
+		      <img src="iot3.jpeg" alt="iotth" width="600" height="350">
+		    </div>
+		  </div>
+		  <!--<a class="carousel-control-prev" href="#demo" data-slide="prev">
+		    <span class="carousel-control-prev-icon"></span>
+		  </a>
+		  <a class="carousel-control-next" href="#demo" data-slide="next">
+		    <span class="carousel-control-next-icon"></span>
+		  </a>-->
+		</div>
+
+		<!--define IoT-->
+		<div style="width: 220px; height: 200px; background-color: #FFFFFF; position: absolute; margin-left: 1020px; margin-top: -400px;">
+			<span>
+				<span style="font-weight: bold;">Internet of Things là gì?</span>
+				Internet of Things, hay IoT, internet vạn vật là đề cập đến hàng tỷ thiết bị vật lý trên khắp thế giới hiện được kết nối với internet, thu thập và chia sẻ dữ liệu. Nhờ bộ xử lý giá rẻ và mạng không dây, có thể biến mọi thứ, từ viên thuốc sang máy bay, thành một phần của IoT.
+			</span>
+		</div>
+		<br>
+		<div style="width: 600px; height: 200px; position: absolute; margin-left: 650px; margin-top: -150px;">
+			<span>
+				<span style="font-weight: bold;">Một số ví dụ về các thiết bị IoT</span> Một bóng đèn có thể được bật bằng ứng dụng điện thoại thông minh là một thiết bị IoT, như một cảm biến chuyển động hoặc một bộ điều chỉnh nhiệt thông minh trong văn phòng của bạn hoặc đèn đường được kết nố.Ở quy mô lớn hơn, các dự án thành phố thông minh đang được lấp đầy bằng các cảm biến để giúp chúng ta hiểu và kiểm soát môi trường. 
+			</span>
+		</div>
+
+		<!--infomation chip, sensor-->
+		<div id="about">
+			<div style="text-align: center;">
+				<span style="color: #FFFFFF; font-size: 45px;">About</span>
+			</div>
+			<div class="underline"></div>
+			<div class="info">
+				<span style="margin-left: 120px; color: #FFFFFF; font-size: 20px;">Esp-12</span>
+				<div style="padding: 10px 6px;">
+			    <span style="color: #FFFFFF;">.Sử dụng nguồn 3.3v</span><br>
+			    <span style="color: #FFFFFF;">.Tích hợp anten PCB trace(Microstrip Antenna) trên module</span><br>
+			    <span style="color: #FFFFFF;">.4MB flash</span><br>
+			    <span style="color: #FFFFFF;">.Tiêu chuẩn wifi : 802.11b/g/n, với tần số 2.4GHz và hổ trợ bảo mật WPA/WPA2</span><br>
+			    <span style="color: #FFFFFF;">.Khoảng cách giữa các chân 2mm</span>
+			    <a href="https://esp8266.vn/introduction/esp-module/" style="color: #FFFFFF;">Detail...</a>
+				</div>
+			</div>
+			<div class="sensor">
+				<span style="margin-left: 120px; color: #FFFFFF; font-size: 20px;">Sensors</span>
+				<div style="padding: 20px 6px;">
+			    <span style="color: #FFFFFF;">.DHT11 <a href="https://iotmaker.vn/cam-bien-nhiet-do-do-am-dht11.html" style="color: #FFFFFF;">Detail...</a></span><br>
+			    <span style="color: #FFFFFF;">.Sensor Light <a href="https://iotmaker.vn/cam-bien-anh-sang-quang-tro.html" style="color: #FFFFFF;">Detal...</a></span><br>
+			    <span style="color: #FFFFFF;">.Sensor MQ2 <a href="https://iotmaker.vn/cam-bien-khi-ga-mq2.html" style="color: #FFFFFF;">Detail...</a></span>
+				</div>
+			</div>
+		</div>
+
+		<!--contact - footer-->
+		<div id="contact">
+			<div class="blocko">
+				<div style="color: #FFFFFF; text-align: center; font-size: 28px; font-weight: bold;">Location</div><br>
+				<div style="color: #FFFFFF; font-size: 20px; text-align: center;">Group3_ThucHanhChuyenSau</div>
+				<div style="color: #FFFFFF; font-size: 20px; text-align: center;">PTIT</div>
+				<!--my map-->
+				<div id="map" style="width:250px; height:250px; position: absolute; margin-left: -30px; border-radius: 10px;">
+					<iframe src="https://www.google.com/maps/embed?pb=!1m14!1m8!1m3!1d14902.655492469956!2d105.7691852!3d20.9660094!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0%3A0x35aa5157715a056d!2sChung+C%C6%B0+Unimax!5e0!3m2!1sfr!2s!4v1564992239256!5m2!1sfr!2s" width="350" height="250" frameborder="0" style="border:0" allowfullscreen></iframe>
+				</div>
+			</div>
+			<div class="blockt">
+				<div style="color: #FFFFFF; text-align: center; font-size: 28px; font-weight: bold;">Around The Web</div><br>
+				<div style="margin-left: 80px;">
+					<a href="https://www.facebook.com/haviet0610"><i class="fab fa-facebook" style="color: #FFFFFF; font-size: 45px;"></i></a>
+
+				</div>
+				<div style="position: absolute; margin-left: 170px; margin-top: -45px;"><a href="https://www.instagram.com/?hl=fr"><i class="fab fa-instagram" style="color: #FFFFFF; font-size: 45px;"></i></a></div>
+				<br>
+				<div>
+					<span style="color: #FFFFFF; font-size: 28px; font-weight: bold; margin-left: 38px;">Contact Us
+					</span>
+					<br>
+					<span style="color: #FFFFFF; font-size: 18px; margin-left: 40px;">Phone: 0399881175
+					</span>
+					<p style="color: #FFFFFF; font-size: 18px; margin-left: 40px;">
+						viethanguyen510@gmail.com
+						<br>
+						<div style="color: #FFFFFF; font-size: 18px; margin-left: 40px;">
+							<a href="http://portal.ptit.edu.vn/" style="text-decoration: none; color: #FFFFFF;">Work: Posts and Telecommunications Institute of Technology</a>
+					</div>
+				</div>
+			</div>
+			<div class="blockth">
+				<div style="color: #FFFFFF; text-align: center; font-size: 28px; font-weight: bold;">Develop</div><br>
+				<div style="color: #FFFFFF; font-size: 20px; text-align: center;"><a href="https://www.w3schools.com/html/" style="text-decoration: none; color: #FFFFFF;">HTML/CSS</a></div>
+				<div style="color: #FFFFFF; font-size: 20px; text-align: center;"><a href="https://getbootstrap.com/" style="text-decoration: none; color: #FFFFFF;">BOOTSTRAP</a></div>
+				<div style="color: #FFFFFF; font-size: 20px; text-align: center;"><a href="https://www.w3schools.com/nodejs/" style="text-decoration: none; color: #FFFFFF;">NodeJs</a></div>
+				<div style="color: #FFFFFF; font-size: 20px; text-align: center;"><a href="https://socket.io/" style="text-decoration: none; color: #FFFFFF;">SOCKET.IO</a></div>
+			</div>
+			<div style="position: absolute; text-align: center; margin-top: 415px; margin-left: 530px;">
+				<span style="color: #FFFFFF">Created at 2019 - No Copyright <i class="far fa-copyright" style="color: #FFFFFF"></i></span>
+			</div>
+		</div>
+	</div>
+</body>
+</html>
